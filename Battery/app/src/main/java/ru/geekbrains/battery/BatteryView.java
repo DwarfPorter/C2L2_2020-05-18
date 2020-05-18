@@ -51,6 +51,9 @@ public class BatteryView extends View {
     // Касаемся элемента +
     private boolean pressed = false;
 
+    // Слушатель касания +
+    private OnClickListener listener;
+
     public BatteryView(Context context) {
         super(context);
         init();
@@ -178,11 +181,20 @@ public class BatteryView extends View {
 
         if (action == MotionEvent.ACTION_DOWN){
             pressed = true;
+
+            if (listener != null){
+                listener.onClick(this);
+            }
         } else if (action == MotionEvent.ACTION_UP){
             pressed = false;
         }
 
         invalidate();
         return true;
+    }
+
+    @Override
+    public void setOnClickListener(OnClickListener listener) {
+        this.listener = listener;
     }
 }
