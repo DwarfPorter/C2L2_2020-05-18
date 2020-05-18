@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -26,6 +27,8 @@ public class BatteryView extends View {
     private int batteryColor = Color.GRAY;
     // Цвет уровня заряда
     private int levelColor = Color.GREEN;
+    // Цвет уровня заряда при нажатии +
+    private int levelPressedColor = Color.RED;
     // Уровень заряда
     private int level = 100;
 
@@ -38,10 +41,15 @@ public class BatteryView extends View {
     private Paint batteryPaint;
     // "Краска" заряда
     private Paint levelPaint;
+    // "Краска" уровня заряда при касании +
+    private Paint levelPressedPaint;
     // Ширина элемента
     private int width = 0;
     // Высота элемента
     private int height = 0;
+
+    // Касаемся элемента +
+    private boolean pressed = false;
 
     public BatteryView(Context context) {
         super(context);
@@ -86,6 +94,9 @@ public class BatteryView extends View {
         levelPaint = new Paint();
         levelPaint.setColor(levelColor);
         levelPaint.setStyle(Paint.Style.FILL);
+        levelPressedPaint = new Paint();
+        levelPressedPaint.setColor(levelPressedColor);
+        levelPressedPaint.setStyle(Paint.Style.FILL);
     }
 
     // Инициализация атрибутов пользовательского элемента из xml
@@ -109,6 +120,8 @@ public class BatteryView extends View {
         // следующее слово - имя атрибута:
         // <attr name="level" format="integer" />
         level = typedArray.getInteger(R.styleable.BatteryView_level, 100);
+
+        levelPressedColor = typedArray.getColor(R.styleable.BatteryView_level_pressed_color, Color.RED);
 
         // В конце работы дадим сигнал, что массив со значениями атрибутов
         // больше не нужен. Система в дальнейшем будет переиспользовать этот
@@ -150,7 +163,26 @@ public class BatteryView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         canvas.drawRoundRect(batteryRectangle, round, round, batteryPaint);
-        canvas.drawRect(levelRectangle, levelPaint);
+        if (pressed){
+            canvas.drawRect(levelRectangle, levelPressedPaint);
+        } else {
+            canvas.drawRect(levelRectangle, levelPaint);
+        }
         canvas.drawRect(headRectangle, batteryPaint);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        // Получаем действие (касание, отпускание, перемещение и т. д.)
+        int action = event.getAction();
+
+        if (action == MotionEvent.ACTION_DOWN){
+            pressed = true;
+        } else if (action == MotionEvent.ACTION_UP){
+            pressed = false;
+        }
+
+        invalidate();
+        return true;
     }
 }
